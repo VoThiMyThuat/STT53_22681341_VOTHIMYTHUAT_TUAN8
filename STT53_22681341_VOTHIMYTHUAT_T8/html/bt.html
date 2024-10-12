@@ -1,0 +1,173 @@
+<!DOCTYPE html>  
+<html lang="vi">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Đăng ký dịch vụ</title>  
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">  
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>  
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>  
+    <style>  
+        body {  
+            font-family: Arial, sans-serif;  
+        }  
+        .error {  
+            color: red;  
+        }  
+    </style>  
+</head>  
+<body>  
+    <nav class="navbar navbar-expand navbar-light bg-light">  
+        <a class="navbar-brand" href="#">Trang chủ</a>  
+        <ul class="navbar-nav">  
+            <li class="nav-item"><a class="nav-link" href="#" id="btnRegister">Đăng ký</a></li>  
+            <li class="nav-item"><a class="nav-link" href="#">Trợ giúp</a></li>  
+        </ul>  
+    </nav>  
+
+    <div class="container mt-4">  
+        <h2 class="mb-4">Đăng ký dịch vụ</h2>  
+        <table class="table table-bordered">  
+            <thead>  
+                <tr>  
+                    <th>STT</th>  
+                    <th>Mã học viên</th>  
+                    <th>Họ tên</th>  
+                    <th>Email</th>  
+                    <th>Tiền dịch vụ</th>  
+                    <th>Tiền đồ dùng</th>  
+                    <th>Tổng tiền</th>  
+                </tr>  
+            </thead>  
+            <tbody id="registrationTableBody">  
+                <!-- Dữ liệu sẽ được thêm vào đây -->  
+            </tbody>  
+        </table>  
+    </div>  
+
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog">  
+        <div class="modal-dialog" role="document">  
+            <div class="modal-content">  
+                <div class="modal-header">  
+                    <h5 class="modal-title">Thông tin đăng ký</h5>  
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">  
+                        <span aria-hidden="true">&times;</span>  
+                    </button>  
+                </div>  
+                <div class="modal-body">  
+                    <form id="registrationForm">  
+                        <div class="form-group">  
+                            <label for="txtMaSV">Mã học viên:</label>  
+                            <input type="text" class="form-control" id="txtMaSV" required>  
+                            <small class="error" id="maSVError"></small>  
+                        </div>  
+                        <div class="form-group">  
+                            <label for="txtTen">Họ tên:</label>  
+                            <input type="text" class="form-control" id="txtTen" required>  
+                            <small class="error" id="tenError"></small>  
+                        </div>  
+                        <div class="form-group">  
+                            <label for="txtEmail">Email:</label>  
+                            <input type="email" class="form-control" id="txtEmail" required>  
+                            <small class="error" id="emailError"></small>  
+                        </div>  
+                        <div class="form-group">  
+                            <label for="txtDC">Tiền dịch vụ:</label>  
+                            <input type="text" class="form-control" id="txtDC" disabled>  
+                        </div>  
+                        <div class="form-group">  
+                            <label>Đồ dùng:</label><br>  
+                            <input type="checkbox" class="chkDoDung" value="10000"> Áo quần bơi<br>  
+                            <input type="checkbox" class="chkDoDung" value="20000"> Phao<br>  
+                            <input type="checkbox" class="chkDoDung" value="30000"> Kính bơi<br>  
+                            <input type="checkbox" class="chkDoDung" value="15000"> Nón bơi<br>  
+                            <input type="checkbox" class="chkDoDung" value="25000"> Thuyền bơi nhỏ<br>  
+                        </div>  
+                        <div class="form-group">  
+                            <label for="txtTong">Tổng tiền:</label>  
+                            <input type="text" class="form-control" id="txtTong" disabled>  
+                        </div>  
+                        <button type="button" class="btn btn-success" id="btnSave">Thanh toán</button>  
+                    </form>  
+                </div>  
+            </div>  
+        </div>  
+    </div>  
+
+    <script>  
+        $(document).ready(function() {  
+            $("#btnRegister").click(function() {  
+                $("#myModal").modal('show');  
+                $("#txtDC").val(50000); // Ví dụ, tiền dịch vụ cố định  
+                calculateTotal(); // Tính tổng ngay khi mở modal  
+            });  
+
+            $(".chkDoDung").change(function() {  
+                calculateTotal();  
+            });  
+
+            $("#btnSave").click(function() {  
+                let maSV = $("#txtMaSV").val();  
+                let ten = $("#txtTen").val();  
+                let email = $("#txtEmail").val();  
+                let tong = $("#txtTong").val();  
+
+                if (validateForm(maSV, ten, email)) {  
+                    let newRow = `<tr>  
+                        <td></td>  
+                        <td>${maSV}</td>  
+                        <td>${ten}</td>  
+                        <td>${email}</td>  
+                        <td>${$("#txtDC").val()}</td>  
+                        <td>${tong - $("#txtDC").val()}</td>  
+                        <td>${tong}</td>  
+                    </tr>`;  
+                    $("#registrationTableBody").append(newRow);  
+                    $("#myModal").modal('hide');  
+                    $("#registrationForm")[0].reset();  
+                    $("#txtTong").val(0);  
+                }  
+            });  
+
+            function calculateTotal() {  
+                let total = 0;  
+                $(".chkDoDung:checked").each(function() {  
+                    total += parseInt($(this).val());  
+                });  
+                total += parseInt($("#txtDC").val());  
+                $("#txtTong").val(total);  
+            }  
+
+            function validateForm(maSV, ten, email) {  
+                let isValid = true;  
+
+                // Kiểm tra mã học viên  
+                if (!/^\d{9}$/.test(maSV)) {  
+                    $("#maSVError").text("Mã học viên không hợp lệ.");  
+                    isValid = false;  
+                } else {  
+                    $("#maSVError").text("");  
+                }  
+
+                // Kiểm tra họ tên  
+                if (ten.trim() === "") {  
+                    $("#tenError").text("Họ tên không được để trống.");  
+                    isValid = false;  
+                } else {  
+                    $("#tenError").text("");  
+                }  
+
+                // Kiểm tra email  
+                if (!email.endsWith("@iuh.edu.vn")) {  
+                    $("#emailError").text("Email phải có đuôi @iuh.edu.vn.");  
+                    isValid = false;  
+                } else {  
+                    $("#emailError").text("");  
+                }  
+
+                return isValid;  
+            }  
+        });  
+    </script>  
+</body>  
+</html>
